@@ -1,18 +1,27 @@
-import { Navbar, Container, Nav } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Navbar, Nav } from "react-bootstrap";
+import { Link } from 'react-router-dom';
 
 export default function UnsignedInHeader() {  
   return (
-    <Navbar collapseOnSelect expand="lg" bg="light" sticky="top">
-      <Navbar.Brand href="/">MyIFCE</Navbar.Brand>
+    <Navbar collapseOnSelect expand="lg" style={{backgroundColor: 'rgb(115 165 239)'}} fixed="top" sticky="top">
+      <Navbar.Brand>
+        <img
+          style={{marginLeft: '20px'}}
+          alt=""
+          src="logo-ifce.png"
+          width="190"
+          height="50"
+          className="d-inline-block align-top"
+        />
+      </Navbar.Brand>
       <Navbar.Toggle aria-controls="responsive-navbar-nav" />
       <Navbar.Collapse className="justify-content-end">
         <Nav className="me-auto">
-          <Nav.Link href="/" active={true}>Horários</Nav.Link>
-          <Nav.Link href="avisos" active={true}>Avisos</Nav.Link>
+          <Nav.Link as={Link} to="/">Horários</Nav.Link>
+          <Nav.Link as={Link} to="avisos">Avisos</Nav.Link>
         </Nav>
         <Nav>
-          <Nav.Link className="justify-content-end" href="/login">Entrar</Nav.Link>
+          <Nav.Link as={Link} to="signin">Entrar</Nav.Link>
         </Nav>
       </Navbar.Collapse>
     </Navbar>

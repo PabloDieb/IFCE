@@ -1,9 +1,15 @@
-import React from "react";
+import Announcement from "../../services/interfaces/Announcement";
 
-export default function Announcements(props: any) {
+interface props {
+  announcement: Announcement;
+}
+export default function Announcements({announcement}: props) {
   return (
-    <h2>
-      {props.announcement.text}
-    </h2>
+    <>
+      <h2>
+        {announcement.text}
+      </h2>
+      <h6 className="text-muted">{"- " + announcement.author}</h6>
+    </>
   );
 }

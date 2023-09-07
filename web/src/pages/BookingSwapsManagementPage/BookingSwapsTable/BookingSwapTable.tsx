@@ -1,20 +1,27 @@
-import { DocumentData } from "firebase/firestore";
+import { DocumentData, DocumentSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
 import { useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import { getBookingById } from "../../../services/BookingsService";
 import { updateBookingSwapStatus } from "../../../services/BookingSwapService";
-import SwapSolicitationDetailModal from "../SwapSolicitationDetailModal/SwapSolicitationDetailModal";
+import BookingSwap from "../../../services/interfaces/BookingSwap";
+import BookingSwapCardsModal from "../SwapSolicitationDetailModal/BookingSwapCardsModal";
 
-export default function BookingSwapsTable({bookingSwaps, canHandleSwap} : any) {
+interface props {
+  bookingSwaps: QueryDocumentSnapshot<BookingSwap>[];
+  canHandleSwap: boolean;
+}
+
+export default function BookingSwapsTable({bookingSwaps, canHandleSwap}: props) {
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [swapRef, setSwapRef] = useState(false);
-  const [bookingRequested, setBookingRequested] = useState<DocumentData | undefined>();
-  const [bookingRequester, setBookingRequester] = useState<DocumentData | undefined>();
-  const handleShowDetailModal = async (swapRef: any) => {
-    console.log(swapRef.data());
-    setBookingRequester(await getBookingById(swapRef.data().bookingRequesterId))
-    setBookingRequested(await getBookingById(swapRef.data().bookingRequestedId))
-    setSwapRef(swapRef);
+  const [swapDocument, setSwapDocument] = useState<DocumentData>();
+  const [bookingRequested, setBookingRequested] = useState<DocumentSnapshot<DocumentData> | undefined>();
+  const [bookingRequester, setBookingRequester] = useState<DocumentSnapshot<DocumentData> | undefined>();
+
+  const handleShowDetailModal = async (swap: DocumentData) => {
+    console.log(swap.data());
+    setBookingRequester(await getBookingById(swap.data().bookingRequesterId))
+    setBookingRequested(await getBookingById(swap.data().bookingRequestedId))
+    setSwapDocument(swap);
     setShowDetailModal(true);
   }
   const handleCloseDetailModal = () => setShowDetailModal(false);
@@ -31,17 +38,17 @@ export default function BookingSwapsTable({bookingSwaps, canHandleSwap} : any) {
         </thead>
         <tbody>
           { 
-            bookingSwaps?.map( (openSwap: any, index: number) => 
+            bookingSwaps?.map((swap: DocumentData, index: number) => 
             {
               return <tr key={index}>
-                <td>{openSwap.data().professorEmailRequester}</td>
-                <td><Button onClick={() => handleShowDetailModal(openSwap)}>Ver solicitação</Button></td>
+                <td>{swap.data().professorEmailRequester}</td>
+                <td><Button onClick={() => handleShowDetailModal(swap)}>Ver solicitação</Button></td>
               </tr>
             })
           }
         </tbody>
       </Table>
-      : <SwapSolicitationDetailModal swapRef={swapRef} showModal={showDetailModal} handleClose={handleCloseDetailModal} bookingRequested={bookingRequested} bookingRequester={bookingRequester} canHandleSwap={canHandleSwap}></SwapSolicitationDetailModal>
+      : <BookingSwapCardsModal swapDocument={swapDocument!} bookingRequested={bookingRequested!} bookingRequester={bookingRequester!} showModal={showDetailModal} handleClose={handleCloseDetailModal} canHandleSwap={canHandleSwap} />
       }
     </>
   )

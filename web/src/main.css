@@ -3,3 +3,7 @@
   width: 100%;
   margin: 0;
  }
+
+ .divider {
+  margin: 0 !important;
+ }

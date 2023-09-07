@@ -1,12 +1,16 @@
-import { addDoc, collection, query, QueryConstraint, where } from "firebase/firestore"
-import { useCollectionDataOnce } from "react-firebase-hooks/firestore";
+import { addDoc, collection, deleteDoc, DocumentReference, query, QueryConstraint, updateDoc, where } from "firebase/firestore"
+import { useCollectionData, useCollectionDataOnce } from "react-firebase-hooks/firestore";
 import { db } from "../firebase/config";
+import User from "./interfaces/User";
 
-const professorsCollection = collection(db, "users");
+let queryConstraints: QueryConstraint[] = []
 const usersCollection = collection(db, "users");
+const usersQuery = query(usersCollection, ...queryConstraints);
 const usersCollectionQuery = (queryConstraints: Array<QueryConstraint>) => query(usersCollection, ...queryConstraints);
 
-const addUser = (user: any) => addDoc(professorsCollection, user);
+const getUsers = () => useCollectionData(usersCollectionQuery(queryConstraints));
+const addUser = (user: User) => addDoc(usersCollection, user);
+
 const getUserByUid = (uid: string) => {
   const queryConstraints : any = [];
   queryConstraints.push(where("uid", "==", uid));
@@ -15,7 +19,12 @@ const getUserByUid = (uid: string) => {
   return users ? users : []; 
 }
 
+const updateUserByDocRef = (userDocRef: DocumentReference<User>, userData: User) => updateDoc(userDocRef, userData);
+const deleteUserByDocRef = (userDocRef: DocumentReference<User>) => deleteDoc(userDocRef);
 export {
   addUser,
-  getUserByUid
+  getUsers,
+  getUserByUid,
+  updateUserByDocRef,
+  deleteUserByDocRef
 }

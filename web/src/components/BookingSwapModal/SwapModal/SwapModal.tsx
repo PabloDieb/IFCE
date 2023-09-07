@@ -1,47 +1,61 @@
 import moment from "moment";
 import { useRef } from "react";
-import { Modal, Form, Button, ListGroup } from "react-bootstrap";
+import { Modal, Form, Button, ListGroup, Container, Row } from "react-bootstrap";
+import { ArrowRight } from "react-bootstrap-icons";
+import Cards from "../../../pages/BookingSwapsManagementPage/SwapSolicitationDetailModal/Cards";
 import { addBookingSwapSolicitation } from "../../../services/BookingSwapService";
+import BookingSwap from "../../../services/interfaces/BookingSwap";
 import { filterBookingsByTimespanAndProfessor } from "../../../utils/functions";
 
-export default function SwapModal({show, handleClose, bookingId, professorEmailRequested, professorEmail, timespan, snapshot}: any) {
+export default function SwapModal({show, handleClose, bookingId, professorEmailRequested, professorEmail, timespan, bookingProp, snapshot}: any) {
   const messageRef = useRef<HTMLTextAreaElement>(null);
+  
   const handleSaveClick = () => {
-    var data = {
+    var bookingSwap: BookingSwap = {
+      accepted: false,
+      message: messageRef.current!.value!,
+      timespan: timespan,
+      date: moment().toDate(),
+      waiting: true,
       bookingRequestedId: bookingId,
       professorEmailRequested: professorEmailRequested,
       bookingRequesterId: filteredSnapshot[0].id,
       professorEmailRequester: filteredSnapshot[0].data()[timespan].professorEmail,
-      timespan: timespan,
-      message: messageRef.current ? messageRef.current.value : "",
-      waiting: true,
-      accepted: false,
-      date: moment().toDate()
     }
-    console.log(data, 1231231)
-    addBookingSwapSolicitation(data);
+
+    addBookingSwapSolicitation(bookingSwap);
     handleClose();
   }
-  console.log(bookingId)
+
   let filteredSnapshot = filterBookingsByTimespanAndProfessor(snapshot.docs, timespan, professorEmail);
+  console.log(filteredSnapshot.length, professorEmail, )
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Minhas aulas</Modal.Title>
+        <Modal.Title>Solicitar troca</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+      {filteredSnapshot.length ?
+      <>
         {filteredSnapshot?.map((booking: any, index: number) => (
-          <>
-            <ListGroup as="ol" numbered>
+          <Container style={{display: "flex"}}>
+            <Row style={{display: "flex", flexWrap:"nowrap", flexGrow: 0, justifyContent:"center", alignItems: "center", width:"inherit"}}>
+              <Cards classroomName={booking.data().classroomName}></Cards>
+                <ArrowRight style={{display: "flex", alignItems:"center", justifyContent: "flex-start", width:"5rem" ,height:"5rem"}}/>
+              <Cards classroomName={bookingProp.data().classroomName}></Cards>
+            </Row>
+            {/* <ListGroup as="ol" numbered>
               <ListGroup.Item as="li" className="d-flex justify-content-between align-items-start">
                 <div className="ms-2 me-auto">
-                  <div className="fw-bold">{booking.data().classroomName} ({booking.data()[timespan].class})</div>
+                  <div className="fw-bold">{booking.data().classroomName} ({booking.data()[timespan].course})</div>
                   <option key={index} value={booking.data()[timespan].professorEmail}>{booking.data()[timespan].professorEmail}</option>
                 </div>
               </ListGroup.Item>
-            </ListGroup>
-          </>
+            </ListGroup> */}
+            
+          </Container>
         ))}
+        <p>Mensagem:</p>
         <Form.Control as="textarea" ref={messageRef} aria-label="With textarea" />
         <Modal.Footer>
           <Button onClick={() => handleSaveClick()}>Solicitar troca</Button>
@@ -49,6 +63,8 @@ export default function SwapModal({show, handleClose, bookingId, professorEmailR
             Fechar
           </Button>
         </Modal.Footer>
+        </> : <p>Para solicitar uma troca você precisa ter uma reserva nesse mesmo período.</p>
+      }
       </Modal.Body>
     </Modal>
   )

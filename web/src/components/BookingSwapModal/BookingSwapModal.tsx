@@ -15,7 +15,7 @@ export default function BookinSwapModal({show, handleClose}: any) {
     snapshotListenOptions: { includeMetadataChanges: true },
     });
     console.log(user);
-  const creatSwapRequest = (bookingId) => addDoc(collection(db, 'bookingSwap'), bookingId);
+  const creatSwapRequest = (bookingId: any) => addDoc(collection(db, 'bookingSwap'), bookingId);
 
   return(
     <>

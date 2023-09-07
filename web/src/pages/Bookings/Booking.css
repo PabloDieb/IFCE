@@ -1,5 +1,5 @@
 .react-calendar { 
-  width: 400px;
+  width: 100%;
   max-width: 100%;
   background-color: #fff;
   color: #222;
@@ -89,4 +89,8 @@
 
  body > #root > fullscreen{
   position: absolute;     width: 100% !important;     height: 100% !important;
+ }
+
+.calendar-search-btn{
+  width: 100%;
  }

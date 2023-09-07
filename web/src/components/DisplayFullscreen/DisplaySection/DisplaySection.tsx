@@ -17,7 +17,10 @@ export default function  DisplaySection({bookings, classTimespan} : any) {
       <hr />
       <Stack gap={1}>
         {bookingsFiltered?.map(booking => (
+          <>
           <DisplaySectionRow booking={booking} classTimespan={classTimespan} />
+          <hr />
+          </>
         ))}
       </Stack>
     </>

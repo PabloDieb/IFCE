@@ -1,3 +1,12 @@
 .bg-menu {
   background-color: red;
 }
+
+.menu-item:hover{
+  background-color: #c1c4c7;
+}
+
+.modal-full {
+  padding-left: 0 !important;
+  overflow-y: hidden;
+}

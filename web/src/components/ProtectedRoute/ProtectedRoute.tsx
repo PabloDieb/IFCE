@@ -1,12 +1,9 @@
-import { useState } from "react";
-import { Toast, ToastContainer } from "react-bootstrap";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuthValue } from "../../contexts/AuthContext";
-import { checkCurrentSwaps, getOpenSwapsToMe } from "../../services/BookingSwapService";
-import SignedInHeader from "../Header/SignedInHeader/SignedInHeader";
+import { auth } from "../../firebase/config";
 
 export default function ProtectedRoute() {
-  const currentUser = useAuthValue()
+  const [currentUser] = useAuthState(auth)
   if (!currentUser) {
     console.log("DOKDOWK", currentUser)
     return <Navigate to="/" replace />;

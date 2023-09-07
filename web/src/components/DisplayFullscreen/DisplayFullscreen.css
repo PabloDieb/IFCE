@@ -1,9 +1,29 @@
 #containeri {
-  margin-left: 2.5%;
   margin-right: 2.5%;
-  margin-top: 1.5%;
   padding: 0;
   height: 100%;
   width: 100%;
   background-color: "#213232";
+}
+
+hr {
+  margin: 0rem 0;
+}
+
+#date {
+  font-size: 3rem;
+  display: flex;
+}
+#date-text {
+  flex-grow: 1;
+  padding-left: 14rem;
+}
+.fullscreen-header {
+  background-color: #0d6efd78;
+}
+
+.col-image {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }

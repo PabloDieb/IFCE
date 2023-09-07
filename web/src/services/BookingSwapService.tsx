@@ -1,53 +1,70 @@
-import { addDoc, collection, query, QueryConstraint, updateDoc, where } from "firebase/firestore"
+import { addDoc, collection, DocumentData, DocumentReference, DocumentSnapshot, query, QueryConstraint, updateDoc, where } from "firebase/firestore"
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { useAuthValue } from "../contexts/AuthContext";
 import { db } from "../firebase/config";
-import { updateBooking } from "./BookingsService";
+import { updateBooking, updateBookingWithRef } from "./BookingsService";
+import Booking, { ClassroomBookingData } from "./interfaces/Booking";
+import BookingSwap from "./interfaces/BookingSwap";
 
 const bookingSwapCollection = collection(db, "bookingSwap");
 const bookingSwapCollectionQuery = (queryConstraints: Array<QueryConstraint>) => query(bookingSwapCollection, ...queryConstraints);
 
-const addBookingSwapSolicitation = (data: any) => addDoc(bookingSwapCollection, data);
+const addBookingSwapSolicitation = (booking: BookingSwap) => addDoc(bookingSwapCollection, booking);
 
 const getOpenSwapsToMe = (professorEmail: string) => {
   console.log(professorEmail);
-  const queryConstraints : any = [];
+  const queryConstraints: QueryConstraint[] = [];
   queryConstraints.push(where("professorEmailRequested", "==", professorEmail));
   return useCollectionData(bookingSwapCollectionQuery(queryConstraints));
 }
 
-const getOpenSwapsFromMe = (professorEmail: string | null) => {
-  const queryConstraints : any = [];
+const getOpenSwapsFromMe = (professorEmail: string) => {
+  const queryConstraints: QueryConstraint[] = [];
   queryConstraints.push(where("professorEmailRequester", "==", professorEmail));
-  return useCollectionData(bookingSwapCollectionQuery(queryConstraints));
+  return useCollectionData(bookingSwapCollectionQuery(queryConstraints)) ;
 }
 
-const updateBookingSwapStatus = (swapRef: any, accepted: boolean) => {
-  const data = {
-    ...swapRef.data(),
+const getNotificationsByUser = (professorEmail: string) => {
+  const queryConstraints: QueryConstraint[] = [];
+  const queryConstraints2: QueryConstraint[] = [];
+  // queryConstraints.push(where("professorEmailRequester", "==", professorEmail));
+  // queryConstraints.push(where("waiting", "==", true));
+  // var a = useCollectionData(bookingSwapCollectionQuery(queryConstraints));
+  queryConstraints2.push(where("professorEmailRequested", "==", professorEmail));
+  queryConstraints2.push(where("waiting", "==", true));
+  var b = useCollectionData(bookingSwapCollectionQuery(queryConstraints2));
+  if( b[0]?.length){
+    return b[0]!.length;
+  }
+  return 0;
+}
+
+const updateBookingSwapStatus = (swapDocument: DocumentData, accepted: boolean) => {
+  const bookingSwap: BookingSwap = {
+    ...swapDocument.data(),
     accepted,
     waiting: false
   }
-  console.log(swapRef.data());
-  updateDoc(swapRef.ref, data);
+
+  updateDoc(swapDocument.ref, bookingSwap);
 }
 
-const makeBookingSwap = (swapRef: any, bookingRequestedRef: any, bookingRequesterRef: any) => {
-  let timespan = swapRef.data().timespan;
-  let a = bookingRequestedRef.data()[timespan];
-  let b = bookingRequesterRef.data()[timespan];
-  let dataBookingRequestedRef = {[timespan]: {...b}};
-  let dataBookingRequesterRef = {[timespan]: {...a}};
-  console.log(bookingRequesterRef.id,dataBookingRequesterRef, b,dataBookingRequestedRef)
-  updateBooking(bookingRequestedRef.ref, dataBookingRequestedRef);
-  updateBooking(bookingRequesterRef.ref, dataBookingRequesterRef);
-  updateBookingSwapStatus(swapRef, true);
+const makeBookingSwap = (swapDocument: DocumentData, bookingRequestedRef: DocumentSnapshot, bookingRequesterRef: DocumentSnapshot) => {
+  let timespan: string = swapDocument.data().timespan;
+  let bookingRequestedData: ClassroomBookingData = bookingRequestedRef.data()![timespan];
+  let bookingRequesterData: ClassroomBookingData = bookingRequesterRef.data()![timespan];
+  
+  let dataBookingRequesterRef = {[timespan]: {...bookingRequestedData}};
+  let dataBookingRequestedRef = {[timespan]: {...bookingRequesterData}};
+  console.log(bookingRequestedRef.id, bookingRequesterRef.id )
+  updateBookingSwapStatus(swapDocument, true);
+  updateBookingWithRef(bookingRequestedRef.ref, dataBookingRequestedRef);
+  updateBookingWithRef(bookingRequesterRef.ref, dataBookingRequesterRef);
 }
 
 const checkCurrentSwaps = (swapForMeSnapshot: any): boolean => {
   if(swapForMeSnapshot == null) return false;
 
-  const openBookingSwapsForMe = swapForMeSnapshot?.docs.filter(bookingSwap => bookingSwap?.data().waiting);
+  const openBookingSwapsForMe = swapForMeSnapshot?.docs.filter((bookingSwap: any) => bookingSwap?.data().waiting);
 
   return openBookingSwapsForMe.length > 0 ? true : false;
 }
@@ -55,6 +72,7 @@ const checkCurrentSwaps = (swapForMeSnapshot: any): boolean => {
 export {
   addBookingSwapSolicitation,
   getOpenSwapsToMe,
+  getNotificationsByUser,
   getOpenSwapsFromMe,
   updateBookingSwapStatus,
   makeBookingSwap,

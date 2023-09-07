@@ -1,26 +1,33 @@
+import { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { useRef } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { updateBooking } from "../../../services/BookingsService";
-import { getClasses } from "../../../services/ClassesService";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../../../firebase/config";
+import { updateBookingWithRef } from "../../../services/BookingsService";
+import { getDisciplines } from "../../../services/DisciplinesServices";
 
-export default function BookingModal({show, handleClose, bookingRef, hour}: any) {
+export default function BookingModal({show, handleClose, bookingRef, timespan}: any) {
 
-  const [ courses, , , ] = getClasses();
-  const courseRef = useRef<HTMLSelectElement >(null);
+  const [ , , , disciplinesSnapshot] = getDisciplines();
+  const disciplineRef = useRef<HTMLSelectElement >(null);
+  const [user] = useAuthState(auth);
 
   const handleSaveClick = () => {
+    let classElement = getSelectedClassData(disciplinesSnapshot!.docs, disciplineRef!.current!.value)[0];
+    console.log(classElement)
+    console.log(user!.email, classElement!.data())
     const data = {
-      [hour]: {
-        // professorName: localStorage.getItem("userName"),
-        professorName: "José",
-        professorID: localStorage.getItem("userId"),
-        course: courseRef.current.value
+      [timespan]: {
+        professorEmail: user!.email!,
+        course: classElement!.data().discipline,
+        graduation: classElement!.data().courseName,
+        semester: classElement!.data().semester
       }
     }
-    console.log("save",bookingRef, data);
-    updateBooking(bookingRef, data);
+    updateBookingWithRef(bookingRef, data);
     handleClose();
   }
+  console.log(timespan);
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -29,13 +36,15 @@ export default function BookingModal({show, handleClose, bookingRef, hour}: any)
       <Modal.Body>
         <h6>Selecione a aula</h6>
         <Form.Select
-            ref={courseRef}
+            ref={disciplineRef}
             name="curso"
             id="curso"
           >
             <option>Selecione uma opção</option>
-            {courses?.map((course, index) => (
-              <option key={index} value={course.name}>{course.name}</option>
+            {disciplinesSnapshot?.docs.map((discipline, index) => (
+              <option key={index} value={discipline.id}>
+                {discipline.data().discipline}
+              </option>
             ))}
           </Form.Select>
         <Modal.Footer>
@@ -49,4 +58,8 @@ export default function BookingModal({show, handleClose, bookingRef, hour}: any)
       </Modal.Body>
     </Modal>
   )
+}
+
+function getSelectedClassData(docs: QueryDocumentSnapshot<DocumentData>[], id: string) {
+  return docs.filter(element => element.id === id);
 }

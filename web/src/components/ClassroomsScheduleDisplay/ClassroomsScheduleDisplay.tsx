@@ -5,13 +5,9 @@ import { FullScreenHandle } from "react-full-screen";
 import "./ClassroomsScheduleDisplay.css";
 
 export default function ClassroomsScheduleDisplay({bookings}: any) {
-  console.log("AAAAAAAAAAAAA")
   return(
     <Table bordered>
       <thead>
-        {/* <tr id="rowTitle">
-          <th colSpan={5}>{new Date(Date.now()).toLocaleDateString()}   <Button onClick={handle.enter}>FS</Button></th>
-        </tr> */}
         <tr>
           <th>Salas/Horários</th>
           <th style={{flex:1}}>08:00 ~ 09:40</th>
